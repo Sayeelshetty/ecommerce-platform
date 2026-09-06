@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from app.database.mongodb import db
+from app.routes.product import router as product_router 
 
 app = FastAPI()
 
@@ -17,3 +18,6 @@ def database_test():
         return {"message": "MongoDB connection successful"}
     except Exception as e:
         return {"message": "MongoDB connection failed", "error": str(e)}
+    
+
+app.include_router(product_router)
