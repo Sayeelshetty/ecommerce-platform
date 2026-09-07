@@ -1,14 +1,25 @@
-from app.models.product import ProductModel
-from app.schemas.product import ProductCreate,ProductUpdate
-from app.database.mongodb import db
 from bson import ObjectId
 
+from app.database.mongodb import db
+from app.models.product import ProductModel
+from app.schemas.product import ProductCreate, ProductUpdate
+
 def create_product(product: ProductCreate):
+    try:
+        category = db.categories.find_one(
+            {"_id": ObjectId(product.category_id)}
+        )
+    except Exception:
+        return None
+
+    if category is None:
+        return None
+
     product_model = ProductModel(
         name=product.name,
         description=product.description,
         price=product.price,
-        category=product.category,
+        category_id=product.category_id,
         stock=product.stock,
         image_url=product.image_url,
     )
@@ -22,13 +33,10 @@ def create_product(product: ProductCreate):
         "name": product_data["name"],
         "description": product_data["description"],
         "price": product_data["price"],
-        "category": product_data["category"],
+        "category_id": product_data["category_id"],
         "stock": product_data["stock"],
         "image_url": product_data["image_url"],
     }
-
-
-
 
 def get_products():
     products = list(db.products.find())
@@ -40,17 +48,30 @@ def get_products():
     return products
 
 
-
 def update_product(product_id: str, product: ProductUpdate):
     update_data = product.model_dump(exclude_unset=True)
 
     if not update_data:
         return None
 
-    result = db.products.update_one(
-        {"_id": ObjectId(product_id)},
-        {"$set": update_data}
-    )
+    if "category_id" in update_data:
+        try:
+            category = db.categories.find_one(
+                {"_id": ObjectId(update_data["category_id"])}
+            )
+        except Exception:
+            return None
+
+        if category is None:
+            return None
+
+    try:
+        result = db.products.update_one(
+            {"_id": ObjectId(product_id)},
+            {"$set": update_data}
+        )
+    except Exception:
+        return None
 
     if result.matched_count == 0:
         return None
@@ -66,9 +87,11 @@ def update_product(product_id: str, product: ProductUpdate):
 
 
 def delete_product(product_id: str):
-    result = db.products.delete_one(
-        {"_id": ObjectId(product_id)}
-    )
+    try:
+        result = db.products.delete_one(
+            {"_id": ObjectId(product_id)}
+        )
+    except Exception:
+        return False
 
     return result.deleted_count > 0
-

@@ -15,7 +15,15 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_product_api(product: ProductCreate):
-    return create_product(product)
+    created_product = create_product(product)
+
+    if created_product is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid category_id"
+        )
+
+    return created_product
 
 @router.get("/")
 def get_products_api():
@@ -29,7 +37,7 @@ def update_product_api(product_id: str, product: ProductUpdate):
     if updated_product is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Product not found"
+            detail="Product or category not found"
         )
 
     return updated_product
