@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Literal
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.schemas.product import ProductCreate, ProductUpdate
 
@@ -28,8 +30,21 @@ def create_product(
 
 
 @router.get("/")
-def get_products_api():
-    return get_products()
+def get_products_api(
+    search: str | None = Query(None, min_length=1, max_length=100),
+    category_id: str | None = None,
+    min_price: float | None = Query(None, ge=0),
+    max_price: float | None = Query(None, ge=0),
+    sort: Literal["price_asc", "price_desc", "newest"] = "newest",
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+):
+    if min_price is not None and max_price is not None and min_price > max_price:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="min_price cannot exceed max_price")
+    try:
+        return get_products(search, category_id, min_price, max_price, sort, page, limit)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
 
 
 @router.put("/{product_id}")

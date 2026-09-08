@@ -1,34 +1,31 @@
-from fastapi import FastAPI,Depends
+from contextlib import asynccontextmanager
 
-from app.database.mongodb import db
-from app.routes.product import router as product_router 
+from fastapi import FastAPI
+
+from app.database.mongodb import create_indexes
+from app.routes.product import router as product_router
 from app.routes.auth import router as auth_router
 from app.routes.category import router as category_router
 from app.routes.cart import router as cart_router
 from app.routes.order import router as order_router
 
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    create_indexes()
+    yield
 
 
-@app.get("/")
-def root():
-    return {"message": "E-Commerce API is running"}
+app = FastAPI(lifespan=lifespan)
 
-
-@app.get("/db-test")
-def database_test():
-    try:
-        db.command("ping")
-        return {"message": "MongoDB connection successful"}
-    except Exception as e:
-        return {"message": "MongoDB connection failed", "error": str(e)}
-    
-
-    
 
 app.include_router(product_router)
 app.include_router(auth_router)
 app.include_router(category_router)
 app.include_router(cart_router)
 app.include_router(order_router)
+
+
+@app.get("/")
+def root():
+    return {"message": "Ecommerce API is running"}

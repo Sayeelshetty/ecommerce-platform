@@ -1,4 +1,13 @@
+from typing import Literal
+
 from pydantic import BaseModel
+
+
+OrderStatus = Literal["pending", "confirmed", "shipped", "delivered", "cancelled"]
+
+
+class OrderStatusUpdate(BaseModel):
+    status: OrderStatus
 
 
 class OrderItem(BaseModel):
@@ -12,4 +21,4 @@ class OrderResponse(BaseModel):
     user_id: str
     items: list[OrderItem]
     total_amount: float
-    status: str
+    status: OrderStatus

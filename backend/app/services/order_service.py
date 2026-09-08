@@ -1,174 +1,126 @@
 from bson import ObjectId
+
 from app.database.mongodb import db
 from app.models.order import OrderModel
 
 
-def create_order(user_id: str):
-    # Get user's cart
+class OrderServiceError(Exception):
+    def __init__(self, detail: str, status_code: int) -> None:
+        self.detail = detail
+        self.status_code = status_code
+        super().__init__(detail)
+
+
+ALLOWED_TRANSITIONS = {
+    "pending": {"confirmed", "cancelled"}, "confirmed": {"shipped", "cancelled"},
+    "shipped": {"delivered"}, "delivered": set(), "cancelled": set(),
+}
+
+
+def _object_id(value: str, label: str) -> ObjectId:
+    if not ObjectId.is_valid(value):
+        raise OrderServiceError(f"Invalid {label} ID", 422)
+    return ObjectId(value)
+
+
+def serialize_order(order: dict) -> dict:
+    return {"id": str(order["_id"]), "user_id": order["user_id"], "items": order["items"],
+            "total_amount": order["total_amount"], "status": order["status"]}
+
+
+def create_order(user_id: str) -> dict:
+    """Checkout with conditional decrements, preventing concurrent overselling.
+
+    Standalone local MongoDB does not support transactions, so failures compensate
+    already-applied decrements before an order is created.
+    """
     cart = db.carts.find_one({"user_id": user_id})
-
     if cart is None or not cart.get("items"):
-        return False
+        raise OrderServiceError("Cart is empty", 400)
 
-    order_items = []
-    total_amount = 0
-
-    # Check every cart item
+    order_items, total_amount = [], 0.0
     for item in cart["items"]:
-        product_id = item["product_id"]
-        quantity = item["quantity"]
-
-        try:
-            product = db.products.find_one({
-                "_id": ObjectId(product_id)
-            })
-        except Exception:
-            return False
-
+        product = db.products.find_one({"_id": _object_id(item["product_id"], "product")})
         if product is None:
-            return False
+            raise OrderServiceError("Product not found", 404)
+        if item["quantity"] > product["stock"]:
+            raise OrderServiceError("Insufficient stock", 409)
+        order_items.append({"product_id": item["product_id"], "quantity": item["quantity"], "price": product["price"]})
+        total_amount += product["price"] * item["quantity"]
 
-        # Check stock
-        if quantity > product["stock"]:
-            return False
-
-        price = product["price"]
-
-        order_items.append({
-            "product_id": product_id,
-            "quantity": quantity,
-            "price": price
-        })
-
-        total_amount += price * quantity
-
-    # Create order
-    order = OrderModel(
-        user_id=user_id,
-        items=order_items,
-        total_amount=total_amount
-    )
-
-    result = db.orders.insert_one(order.to_dict())
-
-    # Reduce stock
-    for item in cart["items"]:
-        db.products.update_one(
-            {"_id": ObjectId(item["product_id"])},
-            {"$inc": {"stock": -item["quantity"]}}
+    decremented = []
+    for item in order_items:
+        result = db.products.update_one(
+            {"_id": ObjectId(item["product_id"]), "stock": {"$gte": item["quantity"]}},
+            {"$inc": {"stock": -item["quantity"]}},
         )
+        if result.modified_count != 1:
+            for previous in decremented:
+                db.products.update_one({"_id": ObjectId(previous["product_id"])}, {"$inc": {"stock": previous["quantity"]}})
+            raise OrderServiceError("Insufficient stock", 409)
+        decremented.append(item)
 
-    # Clear cart
-    db.carts.update_one(
-        {"_id": cart["_id"]},
-        {"$set": {"items": []}}
-    )
-
-    created_order = db.orders.find_one({
-        "_id": result.inserted_id
-    })
-
-    return {
-        "id": str(created_order["_id"]),
-        "user_id": created_order["user_id"],
-        "items": created_order["items"],
-        "total_amount": created_order["total_amount"],
-        "status": created_order["status"]
-    }
-
-
-def get_user_orders(user_id: str):
-    orders = db.orders.find({"user_id": user_id})
-
-    result = []
-
-    for order in orders:
-        result.append({
-            "id": str(order["_id"]),
-            "user_id": order["user_id"],
-            "items": order["items"],
-            "total_amount": order["total_amount"],
-            "status": order["status"]
-        })
-
-    return result
-
-def get_order_by_id(user_id: str, order_id: str):
     try:
-        order = db.orders.find_one({
-            "_id": ObjectId(order_id),
-            "user_id": user_id
-        })
-    except Exception:
-        return False
+        result = db.orders.insert_one(OrderModel(user_id=user_id, items=order_items, total_amount=total_amount).to_dict())
+    except Exception as exc:
+        for item in decremented:
+            db.products.update_one({"_id": ObjectId(item["product_id"])}, {"$inc": {"stock": item["quantity"]}})
+        raise OrderServiceError("Unable to create order", 400) from exc
 
+    db.carts.update_one({"_id": cart["_id"]}, {"$set": {"items": []}})
+    return serialize_order(db.orders.find_one({"_id": result.inserted_id}))
+
+
+def get_user_orders(user_id: str) -> list[dict]:
+    return [serialize_order(order) for order in db.orders.find({"user_id": user_id}).sort("created_at", -1)]
+
+
+def get_order_by_id(user_id: str, order_id: str) -> dict:
+    order = db.orders.find_one({"_id": _object_id(order_id, "order"), "user_id": user_id})
     if order is None:
-        return False
+        raise OrderServiceError("Order not found", 404)
+    return serialize_order(order)
 
-    return {
-        "id": str(order["_id"]),
-        "user_id": order["user_id"],
-        "items": order["items"],
-        "total_amount": order["total_amount"],
-        "status": order["status"]
-    }
 
-def cancel_order(user_id: str, order_id: str):
-    try:
-        order = db.orders.find_one({
-            "_id": ObjectId(order_id),
-            "user_id": user_id
-        })
-    except Exception:
-        return False
-
-    if order is None:
-        return False
-
-    # Only pending orders can be cancelled
-    if order["status"] != "pending":
-        return False
-
-    # Restore product stock
+def _restore_stock(order: dict) -> None:
     for item in order["items"]:
-        try:
-            db.products.update_one(
-                {"_id": ObjectId(item["product_id"])},
-                {"$inc": {"stock": item["quantity"]}}
-            )
-        except Exception:
-            return False
+        db.products.update_one({"_id": ObjectId(item["product_id"])}, {"$inc": {"stock": item["quantity"]}})
 
-    # Change order status
-    db.orders.update_one(
-        {"_id": order["_id"]},
-        {"$set": {"status": "cancelled"}}
-    )
 
-    updated_order = db.orders.find_one({
-        "_id": order["_id"]
-    })
+def cancel_order(user_id: str, order_id: str) -> dict:
+    object_id = _object_id(order_id, "order")
+    order = db.orders.find_one({"_id": object_id, "user_id": user_id})
+    if order is None:
+        raise OrderServiceError("Order not found", 404)
+    if order["status"] != "pending":
+        raise OrderServiceError("Order cannot be cancelled", 409)
+    if db.orders.update_one({"_id": object_id, "status": "pending"}, {"$set": {"status": "cancelled"}}).modified_count != 1:
+        raise OrderServiceError("Order cannot be cancelled", 409)
+    _restore_stock(order)
+    return serialize_order(db.orders.find_one({"_id": object_id}))
 
-    return {
-        "id": str(updated_order["_id"]),
-        "user_id": updated_order["user_id"],
-        "items": updated_order["items"],
-        "total_amount": updated_order["total_amount"],
-        "status": updated_order["status"]
-    }
 
-def get_all_orders():
-    orders = db.orders.find()
+def get_all_orders() -> list[dict]:
+    return [serialize_order(order) for order in db.orders.find().sort("created_at", -1)]
 
-    result = []
 
-    for order in orders:
-        result.append({
-            "id": str(order["_id"]),
-            "user_id": order["user_id"],
-            "items": order["items"],
-            "total_amount": order["total_amount"],
-            "status": order["status"]
-        })
+def get_order_for_admin(order_id: str) -> dict:
+    order = db.orders.find_one({"_id": _object_id(order_id, "order")})
+    if order is None:
+        raise OrderServiceError("Order not found", 404)
+    return serialize_order(order)
 
-    return result
+
+def update_order_status(order_id: str, new_status: str) -> dict:
+    object_id = _object_id(order_id, "order")
+    order = db.orders.find_one({"_id": object_id})
+    if order is None:
+        raise OrderServiceError("Order not found", 404)
+    current_status = order.get("status")
+    if new_status not in ALLOWED_TRANSITIONS.get(current_status, set()):
+        raise OrderServiceError("Invalid order status transition", 409)
+    if db.orders.update_one({"_id": object_id, "status": current_status}, {"$set": {"status": new_status}}).modified_count != 1:
+        raise OrderServiceError("Invalid order status transition", 409)
+    if new_status == "cancelled":
+        _restore_stock(order)
+    return serialize_order(db.orders.find_one({"_id": object_id}))

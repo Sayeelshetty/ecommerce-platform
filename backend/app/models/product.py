@@ -1,4 +1,5 @@
 from typing import Optional
+from datetime import datetime, timezone
 
 
 class ProductModel:
@@ -17,6 +18,7 @@ class ProductModel:
         self.category_id = category_id
         self.stock = stock
         self.image_url = image_url
+        self.created_at = datetime.now(timezone.utc)
 
     def to_dict(self):
         return {
@@ -26,4 +28,5 @@ class ProductModel:
             "category_id": self.category_id,
             "stock": self.stock,
             "image_url": self.image_url,
+            "created_at": self.created_at,
         }
