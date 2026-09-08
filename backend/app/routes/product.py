@@ -1,29 +1,31 @@
-from fastapi import APIRouter,status,HTTPException
-from app.schemas.product import ProductCreate,ProductUpdate
+from fastapi import APIRouter, Depends, HTTPException, status
+
+from app.schemas.product import ProductCreate, ProductUpdate
+
 from app.services.product_service import (
-    create_product,
     get_products,
-    update_product,
-    delete_product,
+    update_product as update_product_service,
+    delete_product as delete_product_service,
+    create_product as create_product_service,
 )
+
+from app.utils.admin import get_current_admin
+
 
 router = APIRouter(
-    prefix = '/product',
-    tags = ["Products"]
-
+    prefix="/product",
+    tags=["Products"]
 )
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
-def create_product_api(product: ProductCreate):
-    created_product = create_product(product)
 
-    if created_product is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid category_id"
-        )
-
+@router.post("/")
+def create_product(
+    product: ProductCreate,
+    current_admin=Depends(get_current_admin)
+):
+    created_product = create_product_service(product)
     return created_product
+
 
 @router.get("/")
 def get_products_api():
@@ -31,8 +33,12 @@ def get_products_api():
 
 
 @router.put("/{product_id}")
-def update_product_api(product_id: str, product: ProductUpdate):
-    updated_product = update_product(product_id, product)
+def update_product(
+    product_id: str,
+    product: ProductUpdate,
+    current_admin=Depends(get_current_admin)
+):
+    updated_product = update_product_service(product_id, product)
 
     if updated_product is None:
         raise HTTPException(
@@ -43,10 +49,12 @@ def update_product_api(product_id: str, product: ProductUpdate):
     return updated_product
 
 
-
 @router.delete("/{product_id}")
-def delete_product_api(product_id: str):
-    deleted = delete_product(product_id)
+def delete_product(
+    product_id: str,
+    current_admin=Depends(get_current_admin)
+):
+    deleted = delete_product_service(product_id)
 
     if not deleted:
         raise HTTPException(
@@ -55,7 +63,3 @@ def delete_product_api(product_id: str):
         )
 
     return {"message": "Product deleted successfully"}
-
-
-
-
