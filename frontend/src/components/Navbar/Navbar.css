@@ -1,0 +1,282 @@
+.navbar {
+  width: 100%;
+  height: 68px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.navbar__container {
+  width: min(100% - 3rem, 1440px);
+  height: 100%;
+  margin: 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+
+/* ================================
+   BRAND / LOGO
+================================ */
+
+.navbar__brand {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.navbar__brand img {
+  display: block;
+
+  width: 150px;
+  height: 52px;
+
+  object-fit: contain;
+}
+
+
+/* ================================
+   NAVIGATION
+================================ */
+
+.navbar__nav {
+  position: absolute;
+  left: 50%;
+
+  display: flex;
+  align-items: center;
+  gap: 36px;
+
+  transform: translateX(-50%);
+}
+
+.navbar__nav-link {
+  color: #383d47;
+
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1;
+
+  white-space: nowrap;
+
+  transition: color 0.2s ease;
+}
+
+.navbar__nav-link:hover {
+  color: #111827;
+}
+
+
+/* ================================
+   RIGHT SIDE
+================================ */
+
+.navbar__right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+
+/* ================================
+   SEARCH
+================================ */
+
+.navbar__search {
+  width: 24px;
+  height: 24px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  color: #383d47;
+  background: transparent;
+  border: none;
+
+  cursor: pointer;
+
+  transition: color 0.2s ease;
+}
+
+.navbar__search svg {
+  width: 19px;
+  height: 19px;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+
+.navbar__search:hover {
+  color: #111827;
+}
+
+
+/* ================================
+   CART
+================================ */
+
+.navbar__cart {
+  width: 24px;
+  height: 24px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  color: #383d47;
+  background: transparent;
+  border: none;
+
+  cursor: pointer;
+
+  transition: color 0.2s ease;
+}
+
+.navbar__cart svg {
+  width: 20px;
+  height: 20px;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.navbar__cart:hover {
+  color: #111827;
+}
+
+
+/* ================================
+   LOGIN
+================================ */
+
+.navbar__login {
+  padding: 10px 20px;
+
+  color: #ffffff;
+  background: #2563eb;
+
+  border: 1px solid #2563eb;
+  border-radius: 10px;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.navbar__login:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+.navbar__login:active {
+  transform: translateY(1px);
+}
+
+
+/* ================================
+   FOCUS
+================================ */
+
+.navbar__search:focus-visible,
+.navbar__cart:focus-visible,
+.navbar__login:focus-visible,
+.navbar__nav-link:focus-visible,
+.navbar__brand:focus-visible {
+  outline: 3px solid rgb(37 99 235 / 25%);
+  outline-offset: 3px;
+}
+
+
+/* ================================
+   TABLET
+================================ */
+
+@media (max-width: 900px) {
+
+  .navbar__container {
+    width: min(100% - 2rem, 1440px);
+  }
+
+  .navbar__nav {
+    gap: 22px;
+  }
+
+  .navbar__brand img {
+    width: 135px;
+  }
+
+  .navbar__right {
+    gap: 12px;
+  }
+
+}
+
+
+/* ================================
+   MOBILE
+================================ */
+
+@media (max-width: 700px) {
+
+  .navbar {
+    height: 64px;
+  }
+
+  .navbar__nav {
+    display: none;
+  }
+
+  .navbar__brand img {
+    width: 130px;
+    height: 48px;
+  }
+
+}
+
+
+/* ================================
+   SMALL MOBILE
+================================ */
+
+@media (max-width: 480px) {
+
+  .navbar__container {
+    width: calc(100% - 1.5rem);
+  }
+
+  .navbar__brand img {
+    width: 120px;
+  }
+
+  .navbar__search {
+    display: none;
+  }
+
+  .navbar__right {
+    gap: 10px;
+  }
+
+  .navbar__login {
+    padding: 9px 15px;
+    font-size: 13px;
+  }
+
+}

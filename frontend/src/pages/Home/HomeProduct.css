@@ -1,0 +1,157 @@
+.home-products {
+  width: 100%;
+  padding: 0 24px 60px;
+  box-sizing: border-box;
+}
+
+.home-products__container {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+/* Section title */
+
+.home-products__title {
+  margin: 0;
+  padding-top: 44px;
+  padding-bottom: 18px;
+
+  color: #374151;
+
+  font-size: 21px;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+/* Product grid */
+
+.home-products__grid {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns: repeat(5, 200px);
+
+  justify-content: center;
+
+  column-gap: 150px;
+  row-gap: 34px;
+
+  margin: 0;
+  padding: 0 0 46px;
+
+  box-sizing: border-box;
+}
+
+/* See more */
+
+.home-products__see-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 150px;
+  height: 36px;
+
+  margin: 0 auto;
+  padding: 0;
+
+  color: #6b7280;
+
+  background: #ffffff;
+
+  border: 1px solid #d7dce2;
+  border-radius: 4px;
+
+  font-size: 12px;
+  font-weight: 400;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.home-products__see-more:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+/* Smaller desktop */
+
+@media (max-width: 1200px) {
+  .home-products__container {
+    max-width: 980px;
+  }
+
+  .home-products__grid {
+    grid-template-columns: repeat(5, 180px);
+    column-gap: 18px;
+  }
+}
+
+/* Tablet */
+
+@media (max-width: 1000px) {
+  .home-products {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .home-products__container {
+    max-width: 820px;
+  }
+
+  .home-products__grid {
+    grid-template-columns: repeat(4, 185px);
+    column-gap: 20px;
+    row-gap: 32px;
+  }
+}
+
+/* Small tablet */
+
+@media (max-width: 800px) {
+  .home-products__container {
+    max-width: 620px;
+  }
+
+  .home-products__grid {
+    grid-template-columns: repeat(3, 185px);
+    column-gap: 18px;
+    row-gap: 32px;
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 620px) {
+  .home-products {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .home-products__title {
+    padding-top: 36px;
+    padding-bottom: 16px;
+    font-size: 20px;
+  }
+
+  .home-products__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 18px;
+    row-gap: 28px;
+
+    justify-content: stretch;
+  }
+}
+
+/* Small mobile */
+
+@media (max-width: 400px) {
+  .home-products__grid {
+    column-gap: 14px;
+  }
+}
