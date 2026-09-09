@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.schemas.order import OrderStatusUpdate
+from app.schemas.order import CheckoutInfo, OrderStatusUpdate
 from app.services.order_service import (
     OrderServiceError, cancel_order, create_order, get_all_orders,
     get_order_by_id, get_order_for_admin, get_user_orders, update_order_status,
@@ -16,9 +16,9 @@ def _raise_service_error(error: OrderServiceError) -> None:
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_user_order(current_user=Depends(get_current_user)):
+def create_user_order(data: CheckoutInfo, current_user=Depends(get_current_user)):
     try:
-        return create_order(current_user["sub"])
+        return create_order(current_user["sub"], data.model_dump())
     except OrderServiceError as error:
         _raise_service_error(error)
 

@@ -1,18 +1,18 @@
-import React from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getProductImage, handleProductImageError } from "../../utils/productImage.js";
+import { addWishlistItem, getWishlist, removeWishlistItem } from "../../services/api.js";
+import { useAuth } from "../../context/AuthContext.jsx";
 import "./ProductCard.css";
 
 function ProductCard({ product, onClick }) {
-  const rating = 4.5;
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [wishlisted, setWishlisted] = useState(false);
+  const rating = Number(product?.rating ?? 0);
+  const reviewCount = Number(product?.review_count ?? 0);
 
-  const imageName = Array.isArray(product?.image)
-    ? product.image[0]
-    : product?.image;
-
-  const productImage = imageName
-    ? imageName.startsWith("http")
-      ? imageName
-      : `/assets/products/${imageName.split("/").pop()}`
-    : "";
+  const productImage = getProductImage(product);
 
   const price =
     product?.offerPrice ??
@@ -20,10 +20,13 @@ function ProductCard({ product, onClick }) {
     product?.price ??
     0;
 
+  useEffect(() => { if (user) getWishlist().then((list) => setWishlisted((list.product_ids || []).includes(product?.id))).catch(() => {}); else setWishlisted(false); }, [user, product?.id]);
+  const toggleWishlist = async (event) => { event.stopPropagation(); if (!user) { navigate("/login", { state: { from: `/product/${product.id}` } }); return; } try { if (wishlisted) await removeWishlistItem(product.id); else await addWishlistItem(product.id); setWishlisted(!wishlisted); } catch {} };
+
   return (
     <div
       className="product-card"
-      onClick={onClick}
+      onClick={onClick || (() => navigate(`/product/${product.id}`))}
     >
       <div className="product-card__image-wrapper">
         {productImage ? (
@@ -31,6 +34,7 @@ function ProductCard({ product, onClick }) {
             className="product-card__image"
             src={productImage}
             alt={product?.name || "Product"}
+            onError={handleProductImageError}
           />
         ) : (
           <div className="product-card__image-placeholder">
@@ -40,11 +44,9 @@ function ProductCard({ product, onClick }) {
 
         <button
           type="button"
-          className="product-card__wishlist"
+          className={wishlisted ? "product-card__wishlist product-card__wishlist--active" : "product-card__wishlist"}
           aria-label="Add to wishlist"
-          onClick={(event) => {
-            event.stopPropagation();
-          }}
+          onClick={toggleWishlist}
         >
           <img
             src="/assets/icons/heart_icon.svg"
@@ -63,7 +65,7 @@ function ProductCard({ product, onClick }) {
 
       <div className="product-card__rating">
         <span className="product-card__rating-number">
-          {rating}
+          {rating.toFixed(1)}
         </span>
 
         <div className="product-card__stars">
@@ -79,12 +81,14 @@ function ProductCard({ product, onClick }) {
             />
           ))}
         </div>
+        {reviewCount > 0 && <span className="product-card__review-count">({reviewCount})</span>}
       </div>
 
       <div className="product-card__bottom">
-        <p className="product-card__price">
-          ₹{price}
-        </p>
+        <div className="product-card__prices">
+          <p className="product-card__price">₹{price}</p>
+          {product?.offer_price && product.offer_price < product.price && <del>₹{product.price}</del>}
+        </div>
 
         <button
           type="button"
@@ -92,6 +96,7 @@ function ProductCard({ product, onClick }) {
           onClick={(event) => {
             event.stopPropagation();
             onClick?.();
+            if (!onClick) navigate(`/product/${product.id}`);
           }}
         >
           Buy now

@@ -119,6 +119,14 @@ def get_cart(user_id: str):
 
     return serialize_cart(cart)
 
+
+def clear_cart(user_id: str):
+    cart = db.carts.find_one({"user_id": user_id})
+    if cart is None:
+        return {"id": None, "user_id": user_id, "items": []}
+    db.carts.update_one({"_id": cart["_id"]}, {"$set": {"items": []}})
+    return serialize_cart(db.carts.find_one({"_id": cart["_id"]}))
+
 def update_cart_item(
     user_id: str,
     product_id: str,

@@ -29,6 +29,12 @@ FastAPI and MongoDB backend for the e-commerce platform.
 
 The API runs at `http://127.0.0.1:8000`. Interactive Swagger documentation is available at `/docs`.
 
+To load the local development catalog and its local TechNova image references from the backend root:
+
+```bash
+python scripts/seed_products.py
+```
+
 ## Authentication
 
 Register with `POST /auth/register`, then sign in with `POST /auth/login`. The login response contains an access token. Send it on protected endpoints:
@@ -88,7 +94,7 @@ Successful login response:
 
 | Method | Path | Authentication | Description |
 | --- | --- | --- | --- |
-| POST | `/category/` | No | Creates a category. Returns `409` for an existing name. |
+| POST | `/category/` | Admin bearer token | Creates a category. Returns `409` for an existing name. |
 | GET | `/category/` | No | Lists all categories. |
 
 Request body for category creation:
@@ -116,6 +122,7 @@ Create-product body:
   "name": "Wireless Mouse",
   "description": "Compact Bluetooth mouse",
   "price": 29.99,
+  "offer_price": 24.99,
   "category_id": "<category_id>",
   "stock": 20,
   "image_url": "https://example.com/mouse.jpg"
@@ -154,12 +161,24 @@ Update its quantity:
 
 | Method | Path | Authentication | Description |
 | --- | --- | --- | --- |
-| POST | `/order/` | Bearer token | Creates an order from the user's cart, reduces stock, and clears the cart. |
+| POST | `/order/` | Bearer token | Creates an order from the user's cart, stores shipping information, reduces stock, and clears the cart. |
 | GET | `/order/` | Bearer token | Lists the current user's orders. |
 | GET | `/order/{order_id}` | Bearer token | Returns one of the current user's orders. |
 | DELETE | `/order/{order_id}` | Bearer token | Cancels a pending order and restores its stock. |
 
-Creating an order has no request body. It fails with `400` when the cart is empty, a product no longer exists, or available stock is insufficient.
+Creating an order requires customer shipping information:
+
+```json
+{
+  "name": "Ada Lovelace",
+  "phone": "+911234567890",
+  "address": "1 Audit Street",
+  "city": "Bengaluru",
+  "postal_code": "560001"
+}
+```
+
+It fails with `400` when the cart is empty, a product no longer exists, or available stock is insufficient.
 
 ## Common status codes
 

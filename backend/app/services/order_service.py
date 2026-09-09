@@ -25,10 +25,13 @@ def _object_id(value: str, label: str) -> ObjectId:
 
 def serialize_order(order: dict) -> dict:
     return {"id": str(order["_id"]), "user_id": order["user_id"], "items": order["items"],
-            "total_amount": order["total_amount"], "status": order["status"]}
+            "total_amount": order["total_amount"], "status": order["status"],
+            "created_at": order.get("created_at").isoformat() if order.get("created_at") else None,
+            "shipping_info": order.get("shipping_info"), "payment_method": order.get("payment_method", "cod"),
+            "payment_status": order.get("payment_status", "pending")}
 
 
-def create_order(user_id: str) -> dict:
+def create_order(user_id: str, shipping_info: dict | None = None) -> dict:
     """Checkout with conditional decrements, preventing concurrent overselling.
 
     Standalone local MongoDB does not support transactions, so failures compensate
@@ -61,7 +64,7 @@ def create_order(user_id: str) -> dict:
         decremented.append(item)
 
     try:
-        result = db.orders.insert_one(OrderModel(user_id=user_id, items=order_items, total_amount=total_amount).to_dict())
+        result = db.orders.insert_one(OrderModel(user_id=user_id, items=order_items, total_amount=total_amount, shipping_info=shipping_info, payment_method=(shipping_info or {}).get("payment_method", "cod"), payment_status=(shipping_info or {}).get("payment_status", "pending")).to_dict())
     except Exception as exc:
         for item in decremented:
             db.products.update_one({"_id": ObjectId(item["product_id"])}, {"$inc": {"stock": item["quantity"]}})

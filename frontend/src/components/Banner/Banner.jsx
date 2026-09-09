@@ -1,7 +1,8 @@
-import React from "react";
 import "./Banner.css";
+import { useNavigate } from "react-router-dom";
 
 function Banner() {
+  const navigate = useNavigate();
   return (
     <section className="banner">
       <div className="banner__content">
@@ -23,6 +24,7 @@ function Banner() {
           <button
             type="button"
             className="banner__primary-button"
+            onClick={() => navigate("/shop")}
           >
             Shop now
           </button>
@@ -30,6 +32,7 @@ function Banner() {
           <button
             type="button"
             className="banner__secondary-button"
+            onClick={() => navigate("/categories")}
           >
             Explore collection
             <span>→</span>

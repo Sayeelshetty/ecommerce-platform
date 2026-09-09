@@ -1,4 +1,4 @@
-import React from "react";
+import { useNavigate } from "react-router-dom";
 import "./FeaturedProducts.css";
 
 const featuredItems = [
@@ -26,6 +26,7 @@ const featuredItems = [
 ];
 
 function FeaturedProducts() {
+  const navigate = useNavigate();
   return (
     <section className="featured-products">
       <div className="featured-products__container">
@@ -56,6 +57,7 @@ function FeaturedProducts() {
                 <button
                   type="button"
                   className="featured-products__button"
+                  onClick={() => navigate("/shop")}
                 >
                   Buy now
                   <span>↗</span>

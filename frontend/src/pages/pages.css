@@ -1,0 +1,29 @@
+.page-shell { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 56px 0 80px; }
+.page-heading { margin-bottom: 28px; }
+.page-heading h1 { color: #172033; font-size: clamp(30px, 4vw, 48px); letter-spacing: -0.03em; }
+.page-heading p { color: #667085; margin-top: 8px; }
+.page-state { width: min(760px, calc(100% - 32px)); margin: 80px auto; padding: 24px; color: #667085; text-align: center; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; }
+.page-state.error { color: #b42318; background: #fff6f5; border-color: #fecdca; }
+.form-card { width: min(520px, 100%); margin: 0 auto; padding: 32px; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 12px 32px rgb(15 23 42 / 8%); }
+.form-card h1 { margin-bottom: 8px; color: #172033; }
+.form-card > p { margin-bottom: 24px; color: #667085; }
+.form-grid { display: grid; gap: 16px; }
+.form-field { display: grid; gap: 7px; color: #344054; font-size: 14px; font-weight: 600; }
+.form-field input, .form-field textarea, .form-field select { width: 100%; padding: 12px 13px; color: #172033; font: inherit; background: #fff; border: 1px solid #d0d5dd; border-radius: 8px; }
+.form-field textarea { min-height: 110px; resize: vertical; }
+.form-field input:focus, .form-field textarea:focus, .form-field select:focus { outline: 3px solid rgb(37 99 235 / 14%); border-color: #2563eb; }
+.form-error { padding: 11px 13px; color: #b42318; background: #fff6f5; border: 1px solid #fecdca; border-radius: 8px; }
+.form-success { padding: 11px 13px; color: #067647; background: #ecfdf3; border: 1px solid #abefc6; border-radius: 8px; }
+.primary-button, .secondary-button, .danger-button { border-radius: 8px; font-size: 14px; }
+.primary-button { color: #fff; background: #2563eb; }
+.primary-button:hover { background: #1d4ed8; }
+.secondary-button { color: #344054; background: #fff; border-color: #d0d5dd; }
+.secondary-button:hover { background: #f8fafc; }
+.danger-button { color: #b42318; background: #fff; border-color: #fecdca; }
+.inline-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.auth-switch { margin-top: 20px; color: #667085; text-align: center; font-size: 14px; }
+.auth-switch a { color: #2563eb; font-weight: 600; }
+.notice { margin-bottom: 18px; padding: 12px 14px; border-radius: 8px; }
+.notice.error { color: #b42318; background: #fff6f5; }
+.notice.success { color: #067647; background: #ecfdf3; }
+@media (max-width: 600px) { .page-shell { padding-top: 36px; } .form-card { padding: 24px 18px; } }

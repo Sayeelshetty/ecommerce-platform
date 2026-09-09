@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 from app.schemas.cart import CartItemCreate, CartQuantityUpdate
 from app.services.cart_service import (
     add_to_cart,
+    clear_cart,
     get_cart,
     update_cart_item,
     remove_from_cart,
@@ -90,3 +91,8 @@ def delete_cart_product(
         )
 
     return cart
+
+
+@router.delete("/")
+def clear_user_cart(current_user=Depends(get_current_user)):
+    return clear_cart(current_user["sub"])

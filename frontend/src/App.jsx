@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Route, Routes, useNavigate } from "react-router-dom";
 
 import Navbar from "./components/Navbar/Navbar.jsx";
 import HeaderSlider from "./components/HeaderSlider/HeaderSlider.jsx";
@@ -10,14 +10,28 @@ import Footer from "./components/Footer/Footer.jsx";
 
 import Shop from "./pages/Shop/Shop.jsx";
 import Categories from "./pages/Categories/Categories.jsx";
+import ProductDetails from "./pages/ProductDetails.jsx";
+import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
+import Cart from "./pages/Cart.jsx";
+import Checkout from "./pages/Checkout.jsx";
+import Orders from "./pages/Orders.jsx";
+import OrderDetails from "./pages/OrderDetails.jsx";
+import Account from "./pages/Account.jsx";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
+import AdminProducts from "./pages/AdminProducts.jsx";
+import AdminProductForm from "./pages/AdminProductForm.jsx";
+import AdminOrders from "./pages/AdminOrders.jsx";
+import AdminOrderDetails from "./pages/AdminOrderDetails.jsx";
+import Wishlist from "./pages/Wishlist.jsx";
+import InfoPage from "./pages/InfoPage.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import { AuthProvider } from "./context/AuthContext.jsx";
 
 import { getProducts } from "./services/api.js";
 
-function Home({
-  products,
-  loading,
-  error,
-}) {
+function Home({ products, loading, error }) {
+  const navigate = useNavigate();
   return (
     <>
       <HeaderSlider />
@@ -47,7 +61,7 @@ function Home({
 
       {!loading && !error && (
         <>
-          <HomeProduct products={products} />
+          <HomeProduct products={products} onSeeMore={() => navigate("/shop")} />
 
           <FeaturedProducts />
 
@@ -84,11 +98,11 @@ function App() {
   }, []);
 
   return (
-    <div>
-      <Navbar />
-
-      <main>
-        <Routes>
+    <AuthProvider>
+      <div>
+        <Navbar />
+        <main>
+          <Routes>
           <Route
             path="/"
             element={
@@ -105,15 +119,38 @@ function App() {
             element={<Shop />}
           />
 
-          <Route
-            path="/categories"
-            element={<Categories />}
-          />
-        </Routes>
-      </main>
-
-      <Footer />
-    </div>
+            <Route path="/categories" element={<Categories />} />
+            <Route path="/product/:id" element={<ProductDetails />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/about" element={<InfoPage page="about" />} />
+            <Route path="/contact" element={<InfoPage page="contact" />} />
+            <Route path="/privacy" element={<InfoPage page="privacy" />} />
+            <Route path="/terms" element={<InfoPage page="terms" />} />
+            <Route path="/help" element={<InfoPage page="help" />} />
+            <Route path="/returns" element={<InfoPage page="returns" />} />
+            <Route element={<ProtectedRoute />}>
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/orders/:id" element={<OrderDetails />} />
+              <Route path="/account" element={<Account />} />
+              <Route path="/wishlist" element={<Wishlist />} />
+            </Route>
+            <Route element={<ProtectedRoute admin />}>
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/products" element={<AdminProducts />} />
+              <Route path="/admin/products/new" element={<AdminProductForm />} />
+              <Route path="/admin/products/edit/:id" element={<AdminProductForm />} />
+              <Route path="/admin/orders" element={<AdminOrders />} />
+              <Route path="/admin/orders/:id" element={<AdminOrderDetails />} />
+            </Route>
+            <Route path="*" element={<InfoPage />} />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </AuthProvider>
   );
 }
 

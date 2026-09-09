@@ -1,7 +1,9 @@
-import React from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getCategories } from "../../services/api.js";
 import "./Categories.css";
 
-const categories = [
+const fallbackCategories = [
   {
     id: 1,
     name: "Laptops",
@@ -52,7 +54,27 @@ const categories = [
   },
 ];
 
+const categoryImages = {
+  Laptops: "/assets/products/asus_laptop_image.png",
+  Smartphones: "/assets/products/samsung_s23phone_image.png",
+  Audio: "/assets/products/bose_headphone_image.png",
+  Gaming: "/assets/products/playstation_image.png",
+  Monitors: "/assets/products/monitor.jpg",
+  Wearables: "/assets/products/venu_watch_image.png",
+  "Computer Accessories": "/assets/products/mechanical_keyboard.jpg",
+  Accessories: "/assets/products/wireless_mouse.jpg",
+  Cameras: "/assets/products/cannon_camera_image.png",
+};
+
 function Categories() {
+  const navigate = useNavigate();
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getCategories().then(setCategories).catch(() => setCategories(fallbackCategories)).finally(() => setLoading(false));
+  }, []);
+
   return (
     <main className="categories-page">
       <div className="categories-page__container">
@@ -71,7 +93,8 @@ function Categories() {
           </p>
         </header>
 
-        <section className="categories-page__grid">
+        {loading && <div className="page-state">Loading categories...</div>}
+        {!loading && <section className="categories-page__grid">
           {categories.map((category) => (
             <article
               className="category-card"
@@ -80,11 +103,10 @@ function Categories() {
               <div className="category-card__image-wrapper">
                 <img
                   className="category-card__image"
-                  src={category.image}
+                  src={category.image || categoryImages[category.name] || "/assets/products/wireless_mouse.jpg"}
                   alt={category.name}
                   onError={(event) => {
-                    event.currentTarget.src =
-                      "/assets/products/apple_earphone_image.png";
+                    event.currentTarget.src = "/assets/products/wireless_mouse.jpg";
                   }}
                 />
               </div>
@@ -101,6 +123,7 @@ function Categories() {
                 <button
                   type="button"
                   className="category-card__button"
+                  onClick={() => navigate(`/shop${category.id ? `?category_id=${category.id}` : ""}`)}
                 >
                   Explore
                   <span>→</span>
@@ -108,7 +131,7 @@ function Categories() {
               </div>
             </article>
           ))}
-        </section>
+        </section>}
       </div>
     </main>
   );

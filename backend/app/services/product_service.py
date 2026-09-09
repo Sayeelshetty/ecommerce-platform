@@ -20,6 +20,9 @@ def create_product(product: ProductCreate):
         name=product.name,
         description=product.description,
         price=product.price,
+        offer_price=product.offer_price,
+        rating=product.rating,
+        review_count=product.review_count,
         category_id=product.category_id,
         stock=product.stock,
         image_url=product.image_url,
@@ -34,6 +37,9 @@ def create_product(product: ProductCreate):
         "name": product_data["name"],
         "description": product_data["description"],
         "price": product_data["price"],
+        "offer_price": product_data["offer_price"],
+        "rating": product_data["rating"],
+        "review_count": product_data["review_count"],
         "category_id": product_data["category_id"],
         "stock": product_data["stock"],
         "image_url": product_data["image_url"],
@@ -137,6 +143,11 @@ def update_product(product_id: str, product: ProductUpdate):
     existing_product = db.products.find_one({"_id": object_id})
 
     if existing_product is None:
+        return None
+
+    effective_price = update_data.get("price", existing_product.get("price"))
+    effective_offer = update_data.get("offer_price", existing_product.get("offer_price"))
+    if effective_offer is not None and effective_offer > effective_price:
         return None
 
     # Update product

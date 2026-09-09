@@ -209,11 +209,8 @@
 
   display: grid;
 
-  grid-template-columns: repeat(5, 200px);
-
-  justify-content: center;
-
-  column-gap: 100px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  column-gap: 24px;
   row-gap: 60px;
 
   margin: 0;
@@ -383,8 +380,7 @@
   }
 
   .shop-page__grid {
-    grid-template-columns: repeat(5, 180px);
-
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     column-gap: 18px;
   }
 }
@@ -417,7 +413,7 @@
   }
 
   .shop-page__grid {
-    grid-template-columns: repeat(4, 185px);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
 
     column-gap: 20px;
     row-gap: 34px;
@@ -434,7 +430,7 @@
   }
 
   .shop-page__grid {
-    grid-template-columns: repeat(3, 185px);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
 
     column-gap: 18px;
     row-gap: 32px;

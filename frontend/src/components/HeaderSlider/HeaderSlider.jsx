@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./HeaderSlider.css";
 
 const sliderData = [
@@ -29,6 +30,7 @@ const sliderData = [
 ];
 
 function HeaderSlider() {
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
@@ -71,6 +73,7 @@ function HeaderSlider() {
                 <button
                   type="button"
                   className="header-slider__primary-button"
+                  onClick={() => navigate("/shop")}
                 >
                   {slide.buttonText1}
                 </button>
@@ -78,6 +81,7 @@ function HeaderSlider() {
                 <button
                   type="button"
                   className="header-slider__secondary-button"
+                  onClick={() => navigate("/shop")}
                 >
                   <span>{slide.buttonText2}</span>
 

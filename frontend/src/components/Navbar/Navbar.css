@@ -67,6 +67,20 @@
   color: #111827;
 }
 
+.navbar__menu-button {
+  display: none;
+  width: 36px;
+  height: 36px;
+  padding: 7px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.navbar__menu-button img {
+  width: 100%;
+  height: 100%;
+}
+
 
 /* ================================
    RIGHT SIDE
@@ -242,7 +256,24 @@
 
   .navbar__nav {
     display: none;
+    position: absolute;
+    z-index: 10;
+    top: 64px;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 8px 16px 14px;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 12px 24px rgb(15 23 42 / 8%);
+    transform: none;
   }
+
+  .navbar__nav--open { display: flex; }
+  .navbar__nav-link { padding: 12px 4px; }
+  .navbar__menu-button { display: inline-flex; margin-left: auto; margin-right: 8px; }
 
   .navbar__brand img {
     width: 130px;
@@ -266,7 +297,7 @@
     width: 120px;
   }
 
-  .navbar__search {
+  .navbar__icon-button:not(.navbar__cart) {
     display: none;
   }
 
