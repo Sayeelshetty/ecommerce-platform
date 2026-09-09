@@ -1,11 +1,62 @@
 import React, { useEffect, useState } from "react";
+import { Routes, Route } from "react-router-dom";
+
 import Navbar from "./components/Navbar/Navbar.jsx";
 import HeaderSlider from "./components/HeaderSlider/HeaderSlider.jsx";
 import HomeProduct from "./pages/HomeProduct.jsx";
 import FeaturedProducts from "./components/FeaturedProducts/FeaturedProducts.jsx";
 import Banner from "./components/Banner/Banner.jsx";
-import { getProducts } from "./services/api.js";
 import Footer from "./components/Footer/Footer.jsx";
+
+import Shop from "./pages/Shop/Shop.jsx";
+import Categories from "./pages/Categories/Categories.jsx";
+
+import { getProducts } from "./services/api.js";
+
+function Home({
+  products,
+  loading,
+  error,
+}) {
+  return (
+    <>
+      <HeaderSlider />
+
+      {loading && (
+        <p
+          style={{
+            textAlign: "center",
+            margin: "40px 0",
+          }}
+        >
+          Loading products...
+        </p>
+      )}
+
+      {error && (
+        <p
+          style={{
+            textAlign: "center",
+            margin: "40px 0",
+            color: "#dc2626",
+          }}
+        >
+          {error}
+        </p>
+      )}
+
+      {!loading && !error && (
+        <>
+          <HomeProduct products={products} />
+
+          <FeaturedProducts />
+
+          <Banner />
+        </>
+      )}
+    </>
+  );
+}
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -37,43 +88,31 @@ function App() {
       <Navbar />
 
       <main>
-        <HeaderSlider />
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <Home
+                products={products}
+                loading={loading}
+                error={error}
+              />
+            }
+          />
 
-        {loading && (
-          <p
-            style={{
-              textAlign: "center",
-              margin: "40px 0",
-            }}
-          >
-            Loading products...
-          </p>
-        )}
+          <Route
+            path="/shop"
+            element={<Shop />}
+          />
 
-        {error && (
-          <p
-            style={{
-              textAlign: "center",
-              margin: "40px 0",
-              color: "#dc2626",
-            }}
-          >
-            {error}
-          </p>
-        )}
-
-        {!loading && !error && (
-          <>
-            <HomeProduct products={products} />
-
-            <FeaturedProducts products={products} />
-
-            <Banner />
-          </>
-        )}
-
-        <Footer/>
+          <Route
+            path="/categories"
+            element={<Categories />}
+          />
+        </Routes>
       </main>
+
+      <Footer />
     </div>
   );
 }

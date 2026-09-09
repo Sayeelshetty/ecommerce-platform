@@ -6,6 +6,7 @@ from app.schemas.product import ProductCreate, ProductUpdate
 
 from app.services.product_service import (
     get_products,
+    get_product_by_id,
     update_product as update_product_service,
     delete_product as delete_product_service,
     create_product as create_product_service,
@@ -45,6 +46,14 @@ def get_products_api(
         return get_products(search, category_id, min_price, max_price, sort, page, limit)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+
+
+@router.get("/{product_id}")
+def get_product_detail(product_id: str):
+    product = get_product_by_id(product_id)
+    if product is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+    return product
 
 
 @router.put("/{product_id}")

@@ -3,10 +3,27 @@ import "./Shop.css";
 import ProductCard from "../../components/ProductCard/ProductCard.jsx";
 import { getProducts } from "../../services/api.js";
 
+const productImages = [
+  "/assets/products/apple_earphone_image.png",
+  "/assets/products/asus_laptop_image.png",
+  "/assets/products/bose_headphone_image.png",
+  "/assets/products/cannon_camera_image.png",
+  "/assets/products/jbl_soundbox_image.png",
+  "/assets/products/macbook_image.png",
+  "/assets/products/md_controller_image.png",
+  "/assets/products/playstation_image.png",
+  "/assets/products/projector_image.png",
+  "/assets/products/samsung_s23phone_image.png",
+  "/assets/products/sm_controller_image.png",
+  "/assets/products/sony_airbuds_image.png",
+  "/assets/products/venu_watch_image.png",
+];
+
 function Shop() {
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("newest");
+
   const [page, setPage] = useState(1);
 
   const [loading, setLoading] = useState(true);
@@ -34,7 +51,12 @@ function Shop() {
     fetchProducts();
   }, []);
 
-  const filteredProducts = products
+  const productsWithImages = products.map((product, index) => ({
+    ...product,
+    image: productImages[index % productImages.length],
+  }));
+
+  const filteredProducts = productsWithImages
     .filter((product) =>
       product.name
         ?.toLowerCase()
@@ -158,7 +180,9 @@ function Shop() {
 
         {!loading && !error && currentProducts.length === 0 && (
           <div className="shop-page__empty">
-            <h2>No products found</h2>
+            <h2>
+              No products found
+            </h2>
 
             <p>
               Try a different search term.
@@ -203,9 +227,11 @@ function Shop() {
                 <button
                   type="button"
                   disabled={currentPage === 1}
-                  onClick={() =>
-                    setPage((prev) => Math.max(1, prev - 1))
-                  }
+                  onClick={() => {
+                    setPage((prev) =>
+                      Math.max(1, prev - 1)
+                    );
+                  }}
                 >
                   Previous
                 </button>
@@ -223,7 +249,9 @@ function Shop() {
                           ? "shop-page__page-number shop-page__page-number--active"
                           : "shop-page__page-number"
                       }
-                      onClick={() => setPage(pageNumber)}
+                      onClick={() => {
+                        setPage(pageNumber);
+                      }}
                     >
                       {pageNumber}
                     </button>
@@ -233,11 +261,11 @@ function Shop() {
                 <button
                   type="button"
                   disabled={currentPage === totalPages}
-                  onClick={() =>
+                  onClick={() => {
                     setPage((prev) =>
                       Math.min(totalPages, prev + 1)
-                    )
-                  }
+                    );
+                  }}
                 >
                   Next
                 </button>

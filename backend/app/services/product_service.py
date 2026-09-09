@@ -100,6 +100,15 @@ def get_products(
     }
 
 
+def get_product_by_id(product_id: str):
+    """Return one public product, or None when the ID is invalid or missing."""
+    if not ObjectId.is_valid(product_id):
+        return None
+
+    product = db.products.find_one({"_id": ObjectId(product_id)})
+    return serialize_product(product) if product else None
+
+
 def update_product(product_id: str, product: ProductUpdate):
     update_data = product.model_dump(exclude_unset=True)
 
