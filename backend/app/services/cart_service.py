@@ -21,10 +21,6 @@ def serialize_cart(cart):
     }
 
 
-
-
-
-
 def add_to_cart(user_id: str, item: CartItemCreate):
     try:
         product = db.products.find_one(
